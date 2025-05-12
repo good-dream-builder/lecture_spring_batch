@@ -1,0 +1,33 @@
+package lets.songko.lecture_spring_batch.config;
+
+import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+
+import javax.sql.DataSource;
+
+@Configuration
+public class DataSourceConfig {
+    @Bean
+    public DataSource dataSource() {
+//        return DataSourceBuilder.create()
+//                .url("jdbc:postgresql://127.0.0.1:5432/jdl")
+//                .username("postgres")
+//                .password("1")
+//                .type(HikariDataSource.class).build();
+        return new EmbeddedDatabaseBuilder()
+                .addScript("/org/springframework/batch/core/schema-drop-hsqldb.sql")
+                .addScript("/org/springframework/batch/core/schema-hsqldb.sql")
+                .addScript("/sql/business-schema-hsqldb.sql")
+                .generateUniqueName(true)
+                .build();
+    }
+
+    @Bean
+    public JdbcTransactionManager transactionManager(DataSource dataSource) {
+        return new JdbcTransactionManager(dataSource);
+    }
+}
