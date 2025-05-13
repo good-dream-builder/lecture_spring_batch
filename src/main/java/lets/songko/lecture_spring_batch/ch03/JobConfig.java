@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 import org.springframework.jdbc.support.JdbcTransactionManager;
@@ -54,11 +55,11 @@ public class JobConfig {
     @StepScope
     @Bean
     public FlatFileItemReader<String> itemReader(
-            @Value("#{jobParameters['inputFile']}") Resource inputFile
+            @Value("#{jobParameters['inputFile']}") String inputFile
     ) {
         return new FlatFileItemReaderBuilder<String>()
                 .name("itemReader")
-                .resource(inputFile)
+                .resource(new FileSystemResource(inputFile))
                 .lineMapper(new PassThroughLineMapper())
                 .build();
     }
@@ -66,14 +67,15 @@ public class JobConfig {
     @StepScope
     @Bean
     public FlatFileItemWriter<String> itemWriter(
-            @Value("#{jobParameters['outputFile']}") Resource outputFile
+            @Value("#{jobParameters['outputFile']}") String outputFile
     ) {
         return new FlatFileItemWriterBuilder<String>()
                 .name("itemWriter")
-                .resource((WritableResource) outputFile)
+                .resource(new FileSystemResource(outputFile))
                 .lineAggregator(new PassThroughLineAggregator<>())
                 .build();
     }
+
 
 
 }

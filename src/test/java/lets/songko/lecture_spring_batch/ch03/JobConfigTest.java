@@ -9,6 +9,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -23,26 +24,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public class JobConfigTest {
 
+    @Autowired
+    private JobLauncher jobLauncher;
+
+    @Autowired
+    private Job job;
+
+    @Autowired
+    private JobExplorer jobExplorer;
+
     @Test
     public void test_tasklet() throws Exception {
-        // given
-        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
-        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
-        Job job = context.getBean(Job.class);
-
-        // runId에 대한 메타테이블 접근을 가능하게 한다.
-        JobExplorer jobExplorer = context.getBean(JobExplorer.class);
-
-        // when
         JobParametersBuilder builder = new JobParametersBuilder(jobExplorer);
-        builder.addJobParameter("inputFile", new ClassPathResource("files/input.txt"), Resource.class);
-        builder.addJobParameter("outputFile", new FileSystemResource(new ClassPathResource("files/input.txt").getPath()), Resource.class);
+        builder.addString("inputFile", new ClassPathResource("files/input.txt").getFile().getAbsolutePath());
+        builder.addString("outputFile", new ClassPathResource("files/output.txt").getFile().getAbsolutePath());
 
-        JobExecution jobExecution = jobLauncher.run(job, builder
-                .getNextJobParameters(job)
-                .toJobParameters());
+        JobExecution jobExecution = jobLauncher.run(job,
+                builder.toJobParameters());
 
-        // then
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
     }
 }
