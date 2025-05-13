@@ -11,18 +11,23 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
+//    @Bean
+//    public DataSource dataSource() {
+//        return new EmbeddedDatabaseBuilder()
+//                .addScript("/org/springframework/batch/core/schema-drop-hsqldb.sql")
+//                .addScript("/org/springframework/batch/core/schema-hsqldb.sql")
+//                .addScript("/sql/business-schema-hsqldb.sql")
+//                .generateUniqueName(true)
+//                .build();
+//    }
+
     @Bean
     public DataSource dataSource() {
-//        return DataSourceBuilder.create()
-//                .url("jdbc:postgresql://127.0.0.1:5432/jdl")
-//                .username("postgres")
-//                .password("1")
-//                .type(HikariDataSource.class).build();
-        return new EmbeddedDatabaseBuilder()
-                .addScript("/org/springframework/batch/core/schema-drop-hsqldb.sql")
-                .addScript("/org/springframework/batch/core/schema-hsqldb.sql")
-                .addScript("/sql/business-schema-hsqldb.sql")
-                .generateUniqueName(true)
+        return DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .url("jdbc:postgresql://127.0.0.1:5432/lec")
+                .username("postgres")
+                .password("1")
                 .build();
     }
 

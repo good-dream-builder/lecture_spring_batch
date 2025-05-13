@@ -1,0 +1,48 @@
+package lets.songko.lecture_spring_batch.ch03;
+
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+public class JobConfigTest {
+
+    @Test
+    public void test_tasklet() throws Exception {
+        // given
+        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
+        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
+        Job job = context.getBean(Job.class);
+
+        // runId에 대한 메타테이블 접근을 가능하게 한다.
+        JobExplorer jobExplorer = context.getBean(JobExplorer.class);
+
+        // when
+        JobParametersBuilder builder = new JobParametersBuilder(jobExplorer);
+        builder.addJobParameter("inputFile", new ClassPathResource("files/input.txt"), Resource.class);
+        builder.addJobParameter("outputFile", new FileSystemResource(new ClassPathResource("files/input.txt").getPath()), Resource.class);
+
+        JobExecution jobExecution = jobLauncher.run(job, builder
+                .getNextJobParameters(job)
+                .toJobParameters());
+
+        // then
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+}

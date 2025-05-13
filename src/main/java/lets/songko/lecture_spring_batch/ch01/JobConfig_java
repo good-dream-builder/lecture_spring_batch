@@ -1,0 +1,296 @@
+package lets.songko.lecture_spring_batch.ch01;
+
+import lets.songko.lecture_spring_batch.config.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.CompositeJobParametersValidator;
+import org.springframework.batch.core.job.DefaultJobParametersValidator;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.listener.JobListenerFactoryBean;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+
+import java.util.Arrays;
+
+@Slf4j
+@EnableBatchProcessing
+@Configuration
+@Import(DataSourceConfig.class)
+public class JobConfig {
+//    @Bean
+//    public Job job(JobRepository jobRepository, Step step) {
+//        System.out.println("▶ Job bean 생성");
+//
+//        return new JobBuilder("job", jobRepository)
+//                .start(step)
+//                .build();
+//    }
+
+    /**
+     * Basic
+     */
+//    @Bean
+//    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+//        System.out.println("▶ Step bean 생성");
+//
+//        return new StepBuilder("step", jobRepository)
+//                .tasklet(new Tasklet() {
+//                    @Override
+//                    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+//                        System.out.println("▶ Hello, World!");
+//                        return RepeatStatus.FINISHED;
+//                    }
+//                }, transactionManager)
+//                .build();
+//
+//    }
+
+    /**
+     * Job parameter
+     */
+//    @Bean
+//    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+//        System.out.println("▶ Step bean 생성");
+//
+//        return new StepBuilder("step", jobRepository)
+//                .tasklet(new Tasklet() {
+//                    @Override
+//                    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+//                        Date today = (Date) chunkContext.getStepContext()
+//                                .getJobParameters()
+//                                .get("today");
+//
+//                        System.out.println("▶ Today is " + today);
+//                        return RepeatStatus.FINISHED;
+//                    }
+//                }, transactionManager)
+//                .build();
+//
+//    }
+
+
+    /**
+     *  Late binding with Spring EL
+     */
+//    @Bean
+//    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+//        System.out.println("▶ Step bean 생성");
+//
+//        return new StepBuilder("step", jobRepository)
+//                .tasklet(tasklet(null), transactionManager)
+//                .build();
+//    }
+//
+//    @StepScope
+//    @Bean
+//    public Tasklet tasklet(@Value("#{jobParameters['foo']}") String foo) {
+//        return ((contribution, chunkContext) -> {
+//            System.out.println("▶ foo's value is " + foo);
+//            return RepeatStatus.FINISHED;
+//        });
+//    }
+
+    /**
+     * Validator
+     */
+//    @Bean
+//    public CompositeJobParametersValidator validator() {
+//        CompositeJobParametersValidator validator = new CompositeJobParametersValidator();
+//
+//        // 기본 제공 검증기
+//        DefaultJobParametersValidator defaultValidator = new DefaultJobParametersValidator();
+//        defaultValidator.setRequiredKeys(new String[]{"fileName"}); // 필수 파라미터 목록
+//        defaultValidator.setOptionalKeys(new String[]{"name"});     // 옵션(비필수) 파라미터 목록
+//        defaultValidator.afterPropertiesSet();
+//
+//        // 커스텀 검증기
+//        validator.setValidators(
+//                Arrays.asList(new ParameterValidator(), defaultValidator)
+//        );
+//
+//        return validator;
+//    }
+//
+//    @Bean
+//    public Job job(JobRepository jobRepository, Step step) {
+//        System.out.println("▶ Job bean 생성");
+//
+//        return new JobBuilder("job", jobRepository)
+//                .start(step)
+//                .validator(validator())
+//                .build();
+//    }
+//
+//    @Bean
+//    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+//        System.out.println("▶ Step bean 생성");
+//
+//        return new StepBuilder("step", jobRepository)
+//                .tasklet(tasklet(null, null), transactionManager)
+//                .build();
+//    }
+//
+//    @StepScope
+//    @Bean
+//    public Tasklet tasklet(@Value("#{jobParameters['name']}") String name,
+//                           @Value("#{jobParameters['fileName']}") String fileName) {
+//
+//        return ((contribution, chunkContext) -> {
+//            System.out.println("▶ Param name's value is " + name);
+//            System.out.println("▶ Param fileName's value is " + fileName);
+//
+//            return RepeatStatus.FINISHED;
+//        });
+//    }
+
+
+    /**
+     * RunIdIncrementer
+     */
+//    @Bean
+//    public CompositeJobParametersValidator validator() {
+//        CompositeJobParametersValidator validator = new CompositeJobParametersValidator();
+//
+//        // 기본 제공 검증기
+//        DefaultJobParametersValidator defaultValidator = new DefaultJobParametersValidator();
+//        defaultValidator.setRequiredKeys(new String[]{"fileName"}); // 필수 파라미터 목록
+//        defaultValidator.setOptionalKeys(new String[]{"name", "run.id"});     // 옵션(비필수) 파라미터 목록
+//        defaultValidator.afterPropertiesSet();
+//
+//        // 커스텀 검증기
+//        validator.setValidators(
+//                Arrays.asList(new ParameterValidator(), defaultValidator)
+//        );
+//
+//        return validator;
+//    }
+//
+//    @Bean
+//    public Job job(JobRepository jobRepository, Step step) {
+//        System.out.println("▶ Job bean 생성");
+//
+//        return new JobBuilder("job", jobRepository)
+//                .start(step)
+//                .validator(validator())
+//                .incrementer(new RunIdIncrementer())
+//                .build();
+//    }
+//
+//    @Bean
+//    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+//        System.out.println("▶ Step bean 생성");
+//
+//        return new StepBuilder("step", jobRepository)
+//                .tasklet(tasklet(null, null), transactionManager)
+//                .build();
+//    }
+//
+//    @StepScope
+//    @Bean
+//    public Tasklet tasklet(@Value("#{jobParameters['name']}") String name,
+//                           @Value("#{jobParameters['fileName']}") String fileName) {
+//
+//        return ((contribution, chunkContext) -> {
+//            System.out.println("▶ Param name's value is " + name);
+//            System.out.println("▶ Param fileName's value is " + fileName);
+//
+//            return RepeatStatus.FINISHED;
+//        });
+//    }
+
+    /**
+     * Custom run incrementer
+     */
+    @Bean
+    public CompositeJobParametersValidator validator() {
+        CompositeJobParametersValidator validator = new CompositeJobParametersValidator();
+
+        // 기본 제공 검증기
+        DefaultJobParametersValidator defaultValidator = new DefaultJobParametersValidator();
+        defaultValidator.setRequiredKeys(new String[]{"fileName"}); // 필수 파라미터 목록
+        defaultValidator.setOptionalKeys(new String[]{"name", "currentDate"});     // 옵션(비필수) 파라미터 목록
+        defaultValidator.afterPropertiesSet();
+
+        // 커스텀 검증기
+        validator.setValidators(
+                Arrays.asList(new ParameterValidator(), defaultValidator)
+        );
+
+        return validator;
+    }
+
+//    @Bean
+//    public Job job(JobRepository jobRepository, Step step) {
+//        System.out.println("▶ Job bean 생성");
+//
+//        return new JobBuilder("job", jobRepository)
+//                .start(step)
+//                .validator(validator())
+//                .incrementer(new DailyJobTimestamper())
+//                .build();
+//    }
+
+    @Bean
+    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+        System.out.println("▶ Step bean 생성");
+
+        return new StepBuilder("step", jobRepository)
+                .tasklet(tasklet(null, null), transactionManager)
+                .build();
+    }
+
+    @StepScope
+    @Bean
+    public Tasklet tasklet(@Value("#{jobParameters['name']}") String name,
+                           @Value("#{jobParameters['fileName']}") String fileName) {
+
+        return ((contribution, chunkContext) -> {
+            System.out.println("▶ Param name's value is " + name);
+            System.out.println("▶ Param fileName's value is " + fileName);
+
+            return RepeatStatus.FINISHED;
+        });
+    }
+
+
+    /**
+     * JobExecutionListener
+     */
+//    @Bean
+//    public Job job(JobRepository jobRepository, Step step) {
+//        System.out.println("▶ Job bean 생성");
+//
+//        return new JobBuilder("job", jobRepository)
+//                .start(step)
+//                .validator(validator())
+//                .incrementer(new DailyJobTimestamper())
+//                .listener(new JobLoggerListener())
+//                .build();
+//    }
+
+    /**
+     * JobExecutionListener with annotation
+     */
+    @Bean
+    public Job job(JobRepository jobRepository, Step step) {
+        System.out.println("▶ Job bean 생성");
+
+        return new JobBuilder("job", jobRepository)
+                .start(step)
+                .validator(validator())
+                .incrementer(new DailyJobTimestamper())
+                .listener(JobListenerFactoryBean.getListener(new JobLoggerListenerByAnnotation()))
+                .build();
+    }
+
+}

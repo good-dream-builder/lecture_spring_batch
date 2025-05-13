@@ -1,0 +1,116 @@
+package lets.songko.lecture_spring_batch.ch01;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+public class JobConfigTest {
+    @Test
+    public void test_Basic() throws Exception {
+        // given
+        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
+        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
+        Job job = context.getBean(Job.class);
+
+        // when
+        JobExecution jobExecution = jobLauncher.run(job, new JobParameters());
+
+        // then
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+
+    @Test
+    public void test_Job_parameter() throws Exception {
+        // given
+        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
+        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
+        Job job = context.getBean(Job.class);
+
+        // when
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addString("foo", "val");
+        builder.addDate("today", new Date());
+        builder.addDouble("Double", 777.7);
+
+        JobExecution jobExecution = jobLauncher.run(job, builder.toJobParameters());
+
+        // then
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+
+    @Test
+    public void test_Validator() throws Exception {
+        // given
+        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
+        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
+        Job job = context.getBean(Job.class);
+
+        // when
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addString("fileName", "my-data.csv");
+        builder.addString("name", "카리나");
+
+        JobExecution jobExecution = jobLauncher.run(job, builder.toJobParameters());
+
+        // then
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+
+    @Test
+    public void test_RunIdIncrementer() throws Exception {
+        // given
+        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
+        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
+        Job job = context.getBean(Job.class);
+
+        // runId에 대한 메타테이블 접근을 가능하게 한다.
+        JobExplorer jobExplorer = context.getBean(JobExplorer.class);
+
+        // when
+        JobParametersBuilder builder = new JobParametersBuilder(jobExplorer);
+        builder.addString("fileName", "my-data.csv");
+        builder.addString("name", "냥녕뇽냥");
+
+        JobExecution jobExecution = jobLauncher.run(job, builder
+                .getNextJobParameters(job)  // Job의 상태를 바탕으로 JobParameters를 초기화한다.
+                .toJobParameters());
+
+        // then
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+
+    @Test
+    public void test_JobExecutionListener() throws Exception {
+        // given
+        ApplicationContext context = new AnnotationConfigApplicationContext(JobConfig.class);
+        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
+        Job job = context.getBean(Job.class);
+
+        // runId에 대한 메타테이블 접근을 가능하게 한다.
+        JobExplorer jobExplorer = context.getBean(JobExplorer.class);
+
+        // when
+        JobParametersBuilder builder = new JobParametersBuilder(jobExplorer);
+        builder.addString("fileName", "my-data.csv");
+        builder.addString("name", "장원영");
+
+        JobExecution jobExecution = jobLauncher.run(job, builder
+                .getNextJobParameters(job)  // Job의 상태를 바탕으로 JobParameters를 초기화한다.
+                .toJobParameters());
+
+        // then
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+}

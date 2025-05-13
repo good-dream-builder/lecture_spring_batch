@@ -1,0 +1,107 @@
+package lets.songko.lecture_spring_batch.ch02;
+
+import lets.songko.lecture_spring_batch.config.DataSourceConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+
+@Slf4j
+@EnableBatchProcessing
+@Configuration
+@Import(DataSourceConfig.class)
+public class JobConfig {
+    @Bean
+    public Job job(JobRepository jobRepository, Step step) {
+        System.out.println("▶ Job bean 생성");
+
+        return new JobBuilder("job", jobRepository)
+                .start(step)
+                .incrementer(new RunIdIncrementer())
+                .build();
+    }
+
+//    @Bean
+//    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+//        System.out.println("▶ Step bean 생성");
+//
+//        return new StepBuilder("step", jobRepository)
+//                .tasklet(tasklet(), transactionManager)
+//                .build();
+//    }
+
+
+    /**
+     * CallableTaskletAdapter
+     */
+//    @Bean
+//    public Callable<RepeatStatus> callable() {
+//        return () -> {
+//            System.out.println("▶ callable 호출");
+//            return RepeatStatus.FINISHED;
+//        };
+//    }
+//
+//    @Bean
+//    public CallableTaskletAdapter tasklet() {
+//        CallableTaskletAdapter adapter = new CallableTaskletAdapter();
+//        adapter.setCallable(callable());
+//        return adapter;
+//    }
+
+
+    /**
+     * MethodInvokingTaskletConfiguration 1
+     */
+    @Bean
+    public CustomService service() {
+        return new CustomService();
+    }
+
+//    @Bean
+//    public MethodInvokingTaskletAdapter tasklet() {
+//        MethodInvokingTaskletAdapter adapter = new MethodInvokingTaskletAdapter();
+//        adapter.setTargetObject(service());
+//        adapter.setTargetMethod("run");
+//        return adapter;
+//    }
+
+    /**
+     * MethodInvokingTaskletConfiguration 2
+     */
+    @Bean
+    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+        System.out.println("▶ Step bean 생성");
+
+        return new StepBuilder("step", jobRepository)
+                .tasklet(tasklet(null), transactionManager)
+                .build();
+    }
+
+    @StepScope
+    @Bean
+    public MethodInvokingTaskletAdapter tasklet(@Value("#{jobParameters['message']}") String message) {
+        MethodInvokingTaskletAdapter adapter = new MethodInvokingTaskletAdapter();
+        adapter.setTargetObject(service());
+        adapter.setTargetMethod("run");
+        adapter.setArguments(new String[]{message});
+        return adapter;
+    }
+
+    /**
+     * TODO SystemCommandTasklet 생략(4장, 50, p139)
+     */
+}
