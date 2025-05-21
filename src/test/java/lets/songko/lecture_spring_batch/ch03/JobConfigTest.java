@@ -34,10 +34,20 @@ public class JobConfigTest {
     private JobExplorer jobExplorer;
 
     @Test
-    public void test_tasklet() throws Exception {
+    public void test1() throws Exception {
         JobParametersBuilder builder = new JobParametersBuilder(jobExplorer);
         builder.addString("inputFile", new ClassPathResource("files/input.txt").getFile().getAbsolutePath());
         builder.addString("outputFile", new ClassPathResource("files/output.txt").getFile().getAbsolutePath());
+
+        JobExecution jobExecution = jobLauncher.run(job,
+                builder.toJobParameters());
+
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
+    }
+
+    @Test
+    public void test2() throws Exception {
+        JobParametersBuilder builder = new JobParametersBuilder(jobExplorer);
 
         JobExecution jobExecution = jobLauncher.run(job,
                 builder.toJobParameters());

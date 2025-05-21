@@ -30,7 +30,6 @@ import org.springframework.jdbc.support.JdbcTransactionManager;
 @Configuration
 @Import(DataSourceConfig.class)
 public class JobConfig {
-    // TODO 4장 53, p143
     @Bean
     public Job job(JobRepository jobRepository, Step step) {
         System.out.println("▶ Job bean 생성");
