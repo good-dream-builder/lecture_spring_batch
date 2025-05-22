@@ -1,0 +1,82 @@
+package lets.songko.lecture_spring_batch.ch03;
+
+import lets.songko.lecture_spring_batch.config.DataSourceConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.ListItemReader;
+import org.springframework.batch.repeat.CompletionPolicy;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Slf4j
+@EnableBatchProcessing
+@Configuration
+@Import(DataSourceConfig.class)
+public class JobConfig3 {
+    @Bean
+    public Job job(JobRepository jobRepository, Step step) {
+        System.out.println("▶ Job");
+
+        return new JobBuilder("job", jobRepository)
+                .start(step)
+                .incrementer(new RunIdIncrementer())
+                .build();
+    }
+
+    @Bean
+    public CompletionPolicy completionPolicy() {
+        return new RandomChunkSizePolicy();
+    }
+
+    @Bean
+    public Step step(JobRepository jobRepository, JdbcTransactionManager transactionManager) {
+        System.out.println("▶ Step");
+
+        return new StepBuilder("step", jobRepository)
+                .<String, String>chunk(completionPolicy(), transactionManager)  // 커밋 간격 : 10
+                .reader(itemReader())
+                .writer(itemWriter())
+                .listener(new LoggingStepStartListener())
+                .build();
+    }
+
+
+    @StepScope
+    @Bean
+    public ListItemReader<String> itemReader() {
+        System.out.println("▶ itemReader");
+        List<String> items = new ArrayList<>(1000);
+        for (int i = 0; i < 1000; i++) {
+            items.add("[item] " + i);
+        }
+
+        return new ListItemReader<>(items);
+    }
+
+    @StepScope
+    @Bean
+    public ItemWriter<String> itemWriter() {
+        System.out.println("▶ itemWriter");
+        return items -> {
+            for (final String item : items) {
+                System.out.println(item);
+            }
+        };
+    }
+
+
+}

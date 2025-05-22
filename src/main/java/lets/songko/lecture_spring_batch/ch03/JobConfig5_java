@@ -1,0 +1,85 @@
+package lets.songko.lecture_spring_batch.ch03;
+
+import lets.songko.lecture_spring_batch.config.DataSourceConfig;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.JobExecutionDecider;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+
+/**
+ * [ 결정자가 반환하는 값을 실행 가능한 스텝에 매핑]
+ */
+@Slf4j
+@EnableBatchProcessing
+@Configuration
+@Import(DataSourceConfig.class)
+@RequiredArgsConstructor
+public class JobConfig5 {
+    private final JobRepository jobRepository;
+    private final JdbcTransactionManager transactionManager;
+
+    // on: ExitStatus를 평가해 어떤 일을 수행할지 결정
+    // to, from은???????
+    @Bean
+    public Job job() {
+        System.out.println("▶ Job");
+        return new JobBuilder("job", jobRepository)
+                .start(firstStep())
+                .next(decider())
+                .from(decider())
+                .on("FAILED").to(failureStep())
+                .from(decider())
+                .on("*").to(successStep())
+                .end()
+                .build();
+    }
+
+    @Bean
+    public JobExecutionDecider decider() {
+        return new RandomDecider();
+    }
+
+
+    @Bean
+    public Step firstStep() {
+        System.out.println("▶ firstStep");
+        return new StepBuilder("firstStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    return RepeatStatus.FINISHED; // successStep 시 주석 해제
+//                    throw new RuntimeException("This is a failure"); // failureStep 시 주석 해제
+                }, transactionManager)
+                .build();
+    }
+
+    @Bean
+    public Step successStep() {
+        System.out.println("▶ successStep");
+        return new StepBuilder("successStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    System.out.println("▶ Success!");
+                    return RepeatStatus.FINISHED;
+                }, transactionManager)
+                .build();
+    }
+
+    @Bean
+    public Step failureStep() {
+        System.out.println("▶ failureStep");
+        return new StepBuilder("failureStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    System.out.println("Failure!");
+                    return RepeatStatus.FINISHED;
+                }, transactionManager)
+                .build();
+    }
+}
